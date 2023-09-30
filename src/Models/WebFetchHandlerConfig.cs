@@ -1,6 +1,6 @@
 using System.Text;
 
-internal record WebFetchHandlerConfig(string Name, string URL, TimeSpan BackoffTime, string FileSinkDir, List<string> Symbols)
+public record WebFetchHandlerConfig(string Name, string URL, TimeSpan BackoffTime, string FileSinkDir, List<string> Symbols)
 {
     public const string WebFetchHandlerConfigName = "WebFetchHandlerConfig";
     public WebFetchHandlerConfig() : this("", "", TimeSpan.Zero, "", new List<string>()) { }

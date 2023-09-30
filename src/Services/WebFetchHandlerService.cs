@@ -5,20 +5,24 @@ using System.Net.Http;
 
 using NLog;
 
-internal class WebFetchHandlerService : BackgroundService
+public class WebFetchHandlerService : IWebFetchHandlerService
 {
     private readonly ILogger<WebFetchHandlerService> _logger;
     private readonly IOptions<WebFetchHandlerConfig> _config;
     private readonly HttpClient _httpClient;
 
-    public WebFetchHandlerService(ILogger<WebFetchHandlerService> logger, IOptions<WebFetchHandlerConfig> config, IHttpClientFactory factory)
+    public WebFetchHandlerService(
+        ILogger<WebFetchHandlerService> logger, 
+        IOptions<WebFetchHandlerConfig> config, 
+        IHttpClientFactory factory
+        )
     {
         _logger = logger;
         _config = config;
         _httpClient = factory.CreateClient("webhandlerClient");
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogTrace("WebFetchHandlerService is starting.");
         _logger.LogTrace("WebFetchHandlerService config: {Config}", _config.Value);
