@@ -2,17 +2,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using NLog;
 using NLog.Extensions.Logging;
-using NLog.Extensions.Hosting;
 using Polly;
 using Polly.Extensions.Http;
 
-await Host.CreateDefaultBuilder(args)
+var host = new HostBuilder()
+        .ConfigureFunctionsWorkerDefaults()
         .ConfigureAppConfiguration((hostContext, config) =>
         {
-            config.AddJsonFile($"appsettings.{args[0]}.json", optional: false, reloadOnChange: true);
+            config.AddJsonFile($"appsettings.json", optional: false, reloadOnChange: true);
             //NLog.Extensions.Logging.ConfigSettingLayoutRenderer.DefaultConfiguration = config;
         })
         .ConfigureLogging(logging =>
@@ -33,13 +31,13 @@ await Host.CreateDefaultBuilder(args)
             });
             services.Configure<AppConfig>(config);
             IServiceCollection serviceCollection = services.Configure<WebFetchHandlerConfig>(config.GetSection(WebFetchHandlerConfig.WebFetchHandlerConfigName));
-            services.AddHostedService<WebFetchHandlerService>();
+            services.AddSingleton<IWebFetchHandlerService, WebFetchHandlerService>();
             services.AddHttpClient<WebFetchHandlerService>("webhandlerClient")
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))  //Set lifetime to five minutes
                 .AddPolicyHandler(GetRetryPolicy());
         })
-        .Build()
-        .RunAsync();
+        .Build();
+    await host.RunAsync();
 
 static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 {
